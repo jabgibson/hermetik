@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jabgibson/hermetik"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/term"
 	"os"
 )
 
@@ -31,14 +30,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Println("Enter Secret: ")
-	input, err := term.ReadPassword(int(os.Stdin.Fd()))
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to read password")
-	}
-	password := string(input)
-
 	if flagEncrypt && flagFilename != "" {
+		password := passwordInput("Enter password: ")
 		fbytes, err := os.ReadFile(flagFilename)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to read file")
@@ -58,6 +51,8 @@ func main() {
 	}
 
 	if flagDecrypt && flagFilename != "" {
+		password := passwordInput("Enter password: ")
+		
 		fbytes, err := os.ReadFile(flagFilename)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to read file")

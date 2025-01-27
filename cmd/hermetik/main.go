@@ -16,12 +16,14 @@ func main() {
 		flagFilename string
 		flagOutFile  string
 		flagVersion  bool
+		flagShiftKey string
 	)
 	flag.BoolVar(&flagEncrypt, "e", false, "encrypt file")
 	flag.BoolVar(&flagDecrypt, "d", false, "decrypt file")
 	flag.StringVar(&flagFilename, "f", "", "filename to encrypt/decrypt")
 	flag.StringVar(&flagOutFile, "o", "", "filename to write encrypted/decrypted file")
 	flag.BoolVar(&flagVersion, "v", false, "show version")
+	flag.StringVar(&flagShiftKey, "sk", "", "shift key out")
 	flag.Parse()
 
 	if flagVersion {

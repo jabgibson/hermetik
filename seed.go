@@ -1,4 +1,4 @@
-package shift
+package hermetik
 
 import "hash/fnv"
 

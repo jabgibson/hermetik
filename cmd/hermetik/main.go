@@ -3,9 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/jabgibson/hermetik/shift"
+	"github.com/jabgibson/hermetik"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/term"
 	"os"
 )
 
@@ -15,26 +14,29 @@ func main() {
 		flagDecrypt  bool
 		flagFilename string
 		flagOutFile  string
+		flagVersion  bool
+		flagShiftKey string
 	)
 	flag.BoolVar(&flagEncrypt, "e", false, "encrypt file")
 	flag.BoolVar(&flagDecrypt, "d", false, "decrypt file")
 	flag.StringVar(&flagFilename, "f", "", "filename to encrypt/decrypt")
 	flag.StringVar(&flagOutFile, "o", "", "filename to write encrypted/decrypted file")
+	flag.BoolVar(&flagVersion, "v", false, "show version")
+	flag.StringVar(&flagShiftKey, "sk", "", "shift key out")
 	flag.Parse()
 
-	fmt.Println("Enter Secret: ")
-	input, err := term.ReadPassword(int(os.Stdin.Fd()))
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to read password")
+	if flagVersion {
+		fmt.Printf("hermetik %s\n", hermetik.Version)
+		os.Exit(0)
 	}
-	password := string(input)
 
 	if flagEncrypt && flagFilename != "" {
+		password := passwordInput("Enter password: ")
 		fbytes, err := os.ReadFile(flagFilename)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to read file")
 		}
-		svc, err := shift.New(password, len(fbytes))
+		svc, err := hermetik.New(password, len(fbytes))
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create service")
 		}
@@ -49,11 +51,13 @@ func main() {
 	}
 
 	if flagDecrypt && flagFilename != "" {
+		password := passwordInput("Enter password: ")
+		
 		fbytes, err := os.ReadFile(flagFilename)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to read file")
 		}
-		svc, err := shift.New(password, len(fbytes))
+		svc, err := hermetik.New(password, len(fbytes))
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create service")
 		}

@@ -1,0 +1,12 @@
+# How the hermetik tool willw work.
+
+## No shift key, so generate one
+
+### creates a new (-new) shift key named (-sk) "hoshek.s7k" using a seed input from prompt (-sp), of 4096 bytes (-size)
+hermetic -new -sk=hoshek.h7k -sp -size=4096
+
+### creates a new (-new) shift key at defaults, key named "shift.s7k"
+hermetic -new -sk
+
+## Has a shift key, and wants to use it to encrypt a file
+hermetic -enc -f=passwords.txt -sk=hoshek.s7k

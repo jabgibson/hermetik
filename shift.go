@@ -6,7 +6,7 @@ import (
 )
 
 func New(secret string, length int) (*Service, error) {
-	seed, err := fnvSeedFromString(secret)
+	seed, err := FNVSeedFromString(secret)
 	if err != nil {
 		return nil, fmt.Errorf("could not create new shift: %v", err)
 	}

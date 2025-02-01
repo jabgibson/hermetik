@@ -10,3 +10,5 @@ hermetic -new -sk
 
 ## Has a shift key, and wants to use it to encrypt a file
 hermetic -enc -f=passwords.txt -sk=hoshek.s7k
+
+h6k -seed -prompt | tee seed.txt | h6k -new -sk > hoshek.s7k

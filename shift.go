@@ -5,6 +5,8 @@ import (
 	"math/rand"
 )
 
+type Shift func(byte) byte
+
 func New(secret string, length int) (*Service, error) {
 	seed, err := FNVSeedFromString(secret)
 	if err != nil {
@@ -21,16 +23,16 @@ type Service struct {
 	seed int64
 }
 
-func (s *Service) Encrypt(subject []byte) []byte {
+func (s *Service) Encrypt(subject []byte, cipher []byte) []byte {
 	for i := range subject {
-		subject[i] = s.transform(subject[i], s.key[i], s.directionEncrypt)
+		subject[i] = s.shiftBytes(subject[i], s.key[i], s.directionEncrypt)
 	}
 	return subject
 }
 
 func (s *Service) Decrypt(subject []byte) []byte {
 	for i := range subject {
-		subject[i] = s.transform(subject[i], s.key[i], s.directionDecrypt)
+		subject[i] = s.shiftBytes(subject[i], s.key[i], s.directionDecrypt)
 	}
 	return subject
 }
@@ -39,7 +41,7 @@ func (s *Service) Key() []byte {
 	return s.key
 }
 
-func (s *Service) transform(subject, inc byte, direction func(byte) byte) byte {
+func (s *Service) shiftBytes(subject, inc byte, direction func(byte) byte) byte {
 	res := subject + direction(inc)
 	if res > 255 {
 		return byte(int(res) - 256)

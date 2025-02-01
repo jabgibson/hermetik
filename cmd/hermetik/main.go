@@ -28,39 +28,91 @@ func init() {
 
 func main() {
 	var (
-		flagPrompt  bool
-		flagSeed    bool
+		flagCipher  string
+		flagEncrypt bool
+		flagFile    string
+		flagNew     bool
+		flagSize    int
 		flagVersion bool
 
-		flagNew      bool
-		flagEncrypt  bool
-		flagDecrypt  bool
-		flagShiftKey string
-		flagOutFile  string
+		flagDecrypt bool
 	)
 
-	flag.BoolVar(&flagPrompt, "prompt", false, "prompt for input")
-	flag.BoolVar(&flagSeed, "seed", false, "generate a seed")
+	flag.BoolVar(&flagEncrypt, "enc", false, "encrypt file")
+	flag.StringVar(&flagFile, "file", "", "file to encrypt")
+	flag.StringVar(&flagCipher, "cipher", "cipher.hx", "cipher file")
+	flag.BoolVar(&flagNew, "new", false, "create a new shift key")
+	flag.IntVar(&flagSize, "size", 512, "size of a new shift key [defaults to random 512 - 1024")
 	flag.BoolVar(&flagVersion, "v", false, "show version")
 
-	flag.BoolVar(&flagNew, "new", false, "create a new shift key")
-	flag.BoolVar(&flagEncrypt, "enc", false, "encrypt file")
 	flag.BoolVar(&flagDecrypt, "dec", false, "decrypt file")
-	flag.StringVar(&flagShiftKey, "sk", "", "filename to encrypt/decrypt")
-	flag.StringVar(&flagOutFile, "o", "", "filename to write encrypted/decrypted file")
 	flag.Parse()
 
 	if flagVersion {
-		log.Printf("hermetik version %s\n", hermetik.Version)
+		fmt.Printf("hermetik version %s\n", hermetik.Version)
 		os.Exit(0)
 	}
 
-	if flagSeed {
-		seed := echoOffUserInput("secret seed: ")
-		log.Info().Msg("obtained user input seed")
-		fmt.Println(seed)
-		fmt.Println(hermetik.FNVSeedFromString(seed))
-		fmt.Println(hermetik.HashSeedFromString(seed))
+	if flagNew {
+		// TODO make random size (right now defaulting to 512)
+		secret := echoOffUserInput("input secret: ")
+		log.Info().Msg("obtained user input secret")
+		seed := hermetik.HashSeedFromString(secret)
+		cipher := hermetik.BuildCipher(seed, flagSize)
+		fmt.Print(string(cipher))
+		//if err := os.WriteFile(flagCipher, cipher, 0600); err != nil {
+		//	log.Fatal().Err(err).Msg("failed to write cipher")
+		//}
+		os.Exit(0)
+	}
+
+	if flagEncrypt {
+		if flagCipher == "" {
+			log.Fatal().Msg("must specify cipher")
+		}
+		if flagFile == "" {
+			log.Fatal().Msg("must specify file to encrypt")
+		}
+
+		subjectBytes, err := os.ReadFile(flagFile)
+		if err != nil {
+			log.Fatal().Err(err).Str("file", flagFile).Msg("failed to read file")
+		}
+		cipherBytes, err := os.ReadFile(flagCipher)
+		if err != nil {
+			log.Fatal().Err(err).Str("file", flagCipher).Msg("failed to read cipher")
+		}
+		encryptedBytes, err := hermetik.Encrypt(cipherBytes, subjectBytes)
+		if err != nil {
+			log.Fatal().Err(err).Str("subject", flagFile).Str("cipher", flagCipher).Msg("failed to encrypt")
+		}
+
+		fmt.Print(string(encryptedBytes))
+		os.Exit(0)
+	}
+
+	if flagDecrypt {
+		if flagCipher == "" {
+			log.Fatal().Msg("must specify cipher")
+		}
+		if flagFile == "" {
+			log.Fatal().Msg("must specify file to encrypt")
+		}
+		subjectBytes, err := os.ReadFile(flagFile)
+		if err != nil {
+			log.Fatal().Err(err).Str("file", flagFile).Msg("failed to read file")
+		}
+		cipherBytes, err := os.ReadFile(flagCipher)
+		if err != nil {
+			log.Fatal().Err(err).Str("file", flagCipher).Msg("failed to read cipher")
+		}
+		decryptedBytes, err := hermetik.Decrypt(cipherBytes, subjectBytes)
+		if err != nil {
+			log.Fatal().Err(err).Str("subject", flagFile).Str("cipher", flagCipher).Msg("failed to decrypt")
+		}
+
+		fmt.Print(string(decryptedBytes))
+		os.Exit(0)
 	}
 
 	//if flagEncrypt && flagShiftKey != "" {
@@ -73,7 +125,7 @@ func main() {
 	//	if err != nil {
 	//		log.Fatal().Err(err).Msg("Failed to create service")
 	//	}
-	//	encrypted := svc.Encrypt(fbytes)
+	//	encrypted := svc.encrypt(fbytes)
 	//	if flagOutFile == "" {
 	//		flagOutFile = flagShiftKey + ".h6k"
 	//	}
@@ -94,7 +146,7 @@ func main() {
 	//	if err != nil {
 	//		log.Fatal().Err(err).Msg("Failed to create service")
 	//	}
-	//	decrypted := svc.Decrypt(fbytes)
+	//	decrypted := svc.decrypt(fbytes)
 	//	if flagOutFile == "" {
 	//		flagOutFile = "decrypted-" + flagShiftKey
 	//	}

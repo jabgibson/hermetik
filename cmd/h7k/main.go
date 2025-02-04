@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/jabgibson/hermetik"
+	"github.com/jabgibson/h7k"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -49,7 +49,7 @@ func main() {
 	flag.Parse()
 
 	if flagVersion {
-		fmt.Printf("hermetik version %s\n", hermetik.Version)
+		fmt.Printf("h7k version %s\n", h7k.Version)
 		os.Exit(0)
 	}
 
@@ -57,8 +57,8 @@ func main() {
 		// TODO make random size (right now defaulting to 512)
 		secret := echoOffUserInput("input secret: ")
 		log.Info().Msg("obtained user input secret")
-		seed := hermetik.HashSeedFromString(secret)
-		cipher := hermetik.BuildCipher(seed, flagSize)
+		seed := h7k.HashSeedFromString(secret)
+		cipher := h7k.BuildCipher(seed, flagSize)
 		fmt.Print(string(cipher))
 		//if err := os.WriteFile(flagCipher, cipher, 0600); err != nil {
 		//	log.Fatal().Err(err).Msg("failed to write cipher")
@@ -82,7 +82,7 @@ func main() {
 		if err != nil {
 			log.Fatal().Err(err).Str("file", flagCipher).Msg("failed to read cipher")
 		}
-		encryptedBytes, err := hermetik.Encrypt(cipherBytes, subjectBytes)
+		encryptedBytes, err := h7k.Encrypt(cipherBytes, subjectBytes)
 		if err != nil {
 			log.Fatal().Err(err).Str("subject", flagFile).Str("cipher", flagCipher).Msg("failed to encrypt")
 		}
@@ -106,7 +106,7 @@ func main() {
 		if err != nil {
 			log.Fatal().Err(err).Str("file", flagCipher).Msg("failed to read cipher")
 		}
-		decryptedBytes, err := hermetik.Decrypt(cipherBytes, subjectBytes)
+		decryptedBytes, err := h7k.Decrypt(cipherBytes, subjectBytes)
 		if err != nil {
 			log.Fatal().Err(err).Str("subject", flagFile).Str("cipher", flagCipher).Msg("failed to decrypt")
 		}
@@ -114,45 +114,5 @@ func main() {
 		fmt.Print(string(decryptedBytes))
 		os.Exit(0)
 	}
-
-	//if flagEncrypt && flagShiftKey != "" {
-	//	password := echoOffUserInput("Enter password: ")
-	//	fbytes, err := os.ReadFile(flagShiftKey)
-	//	if err != nil {
-	//		log.Fatal().Err(err).Msg("Failed to read file")
-	//	}
-	//	svc, err := hermetik.New(password, len(fbytes))
-	//	if err != nil {
-	//		log.Fatal().Err(err).Msg("Failed to create service")
-	//	}
-	//	encrypted := svc.encrypt(fbytes)
-	//	if flagOutFile == "" {
-	//		flagOutFile = flagShiftKey + ".h6k"
-	//	}
-	//	err = os.WriteFile(flagOutFile, encrypted, 0600)
-	//	if err != nil {
-	//		log.Fatal().Err(err).Msg("Failed to write file")
-	//	}
-	//}
-	//
-	//if flagDecrypt && flagShiftKey != "" {
-	//	password := echoOffUserInput("Enter password: ")
-	//
-	//	fbytes, err := os.ReadFile(flagShiftKey)
-	//	if err != nil {
-	//		log.Fatal().Err(err).Msg("Failed to read file")
-	//	}
-	//	svc, err := hermetik.New(password, len(fbytes))
-	//	if err != nil {
-	//		log.Fatal().Err(err).Msg("Failed to create service")
-	//	}
-	//	decrypted := svc.decrypt(fbytes)
-	//	if flagOutFile == "" {
-	//		flagOutFile = "decrypted-" + flagShiftKey
-	//	}
-	//	err = os.WriteFile(flagOutFile, decrypted, 0600)
-	//	if err != nil {
-	//		log.Fatal().Err(err).Msg("Failed to write file")
-	//	}
-	//}
+	
 }

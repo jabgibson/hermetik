@@ -1,4 +1,4 @@
-package hermetik
+package h7k
 
 import "math/rand"
 

@@ -1,4 +1,4 @@
-package hermetik
+package h7k
 
 import (
 	"log"
@@ -7,34 +7,12 @@ import (
 	"testing"
 )
 
-var (
-	jpgBxs           []byte
-	poemBxs          []byte
-	encryptedPoemBxs []byte
-	encryptedJPGBxs  []byte
+const (
+	fileJPG           = "testing/simpsons-jab-cthulhu.jpg"
+	fileJPGEncrypted  = "testing/simpsons-jab-cthulhu.jpg.h7k"
+	filePoem          = "testing/milton_paradise_lost_pg20.txt"
+	filePoemEncrypted = "testing/milton_paradise_lost_pg20.txt.h7k"
 )
-
-func init() {
-	var err error
-	jpgBxs, err = os.ReadFile("testing/simpsons-jab-cthulhu.jpg")
-	if err != nil {
-		log.Fatal(err)
-	}
-	poemBxs, err = os.ReadFile("testing/milton_paradise_lost_pg20.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	encryptedPoemBxs, err = os.ReadFile("testing/milton_paradise_lost_pg20.txt.h7k")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	encryptedJPGBxs, err = os.ReadFile("testing/simpsons-jab-cthulhu.jpg.h7k")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func TestEncrypt(t *testing.T) {
 	type args struct {
@@ -59,19 +37,19 @@ func TestEncrypt(t *testing.T) {
 		{
 			name: "encrypt txt file using jpg as cipher",
 			args: args{
-				cipher:  getFileBytes("testing/simpsons-jab-cthulhu.jpg"),
-				subject: getFileBytes("testing/milton_paradise_lost_pg20.txt"),
+				cipher:  getFileBytes(fileJPG),
+				subject: getFileBytes(filePoem),
 			},
-			want:    getFileBytes("testing/milton_paradise_lost_pg20.txt.h7k"),
+			want:    getFileBytes(filePoemEncrypted),
 			wantErr: false,
 		},
 		{
 			name: "encrypt jpg with text file as cipher",
 			args: args{
-				cipher:  getFileBytes("testing/milton_paradise_lost_pg20.txt"),
-				subject: getFileBytes("testing/simpsons-jab-cthulhu.jpg"),
+				cipher:  getFileBytes(filePoem),
+				subject: getFileBytes(fileJPG),
 			},
-			want:    getFileBytes("testing/simpsons-jab-cthulhu.jpg.h7k"),
+			want:    getFileBytes(fileJPGEncrypted),
 			wantErr: false,
 		},
 	}
@@ -112,19 +90,19 @@ func TestDecrypt(t *testing.T) {
 		{
 			name: "decrypt txt file using jpg as cipher",
 			args: args{
-				cipher:  getFileBytes("testing/simpsons-jab-cthulhu.jpg"),
-				subject: getFileBytes("testing/milton_paradise_lost_pg20.txt.h7k"),
+				cipher:  getFileBytes(fileJPG),
+				subject: getFileBytes(filePoemEncrypted),
 			},
-			want:    getFileBytes("testing/milton_paradise_lost_pg20.txt"),
+			want:    getFileBytes(filePoem),
 			wantErr: false,
 		},
 		{
 			name: "decrypt jpg with text file as cipher",
 			args: args{
-				cipher:  getFileBytes("testing/milton_paradise_lost_pg20.txt"),
-				subject: getFileBytes("testing/simpsons-jab-cthulhu.jpg.h7k"),
+				cipher:  getFileBytes(filePoem),
+				subject: getFileBytes(fileJPGEncrypted),
 			},
-			want:    getFileBytes("testing/simpsons-jab-cthulhu.jpg"),
+			want:    getFileBytes(fileJPG),
 			wantErr: false,
 		},
 	}
